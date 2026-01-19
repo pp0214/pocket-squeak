@@ -21,7 +21,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pocketsqueak.app"
+      "bundleIdentifier": "com.pocketsqueak.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
