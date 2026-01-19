@@ -1,0 +1,143 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "add": "添加",
+    "back": "返回",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "yes": "是",
+    "no": "否",
+    "ok": "好的"
+  },
+  "tabs": {
+    "home": "首页",
+    "record": "记录",
+    "wiki": "百科",
+    "settings": "设置"
+  },
+  "home": {
+    "title": "我的宠物",
+    "noPets": "还没有宠物",
+    "addFirstPet": "添加您的第一只宠物，开始追踪它们的健康状况！",
+    "addPet": "添加宠物",
+    "noData": "暂无数据"
+  },
+  "pet": {
+    "details": "宠物详情",
+    "name": "名字",
+    "species": "物种",
+    "gender": "性别",
+    "birthday": "生日",
+    "age": "年龄",
+    "photo": "照片",
+    "addPhoto": "添加照片",
+    "changePhoto": "更换照片",
+    "male": "公",
+    "female": "母",
+    "unknown": "未知",
+    "rat": "仓鼠",
+    "guineaPig": "豚鼠",
+    "hamster": "仓鼠",
+    "gerbil": "沙鼠",
+    "mouse": "小鼠",
+    "deletePet": "删除宠物",
+    "deleteConfirm": "确定要删除 {{name}} 吗？此操作无法撤销。",
+    "editPet": "编辑宠物",
+    "addPetTitle": "添加宠物",
+    "saveChanges": "保存更改",
+    "initialWeight": "初始体重将设置为 {{weight}}g（{{species}}的典型体重）"
+  },
+  "record": {
+    "title": "快速记录",
+    "todayRecord": "今日记录",
+    "weight": "体重",
+    "observations": "健康观察",
+    "notes": "备注",
+    "unsaved": "未保存",
+    "saved": "已保存",
+    "saveChanges": "保存更改",
+    "weightTrend": "体重趋势",
+    "history": "历史记录",
+    "week": "周",
+    "month": "月",
+    "noHistory": "暂无历史记录",
+    "today": "今天",
+    "yesterday": "昨天"
+  },
+  "observations": {
+    "normal": "正常",
+    "sneeze": "打喷嚏",
+    "porphyrin": "卟啉分泌",
+    "softStool": "软便",
+    "lethargic": "精神不振",
+    "lossOfAppetite": "食欲不振"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "selectLanguage": "选择语言",
+    "notifications": "通知",
+    "dailyReminder": "每日提醒",
+    "reminderTime": "提醒时间",
+    "reminderDescription": "提醒您记录宠物的健康数据",
+    "healthAlerts": "健康警报",
+    "healthAlertsDescription": "当体重显著下降时通知您",
+    "dataManagement": "数据管理",
+    "exportData": "导出数据",
+    "exportDescription": "将健康记录导出为 CSV",
+    "backup": "备份",
+    "backupDescription": "备份和恢复您的数据",
+    "about": "关于",
+    "version": "版本",
+    "appName": "口袋小宠"
+  },
+  "export": {
+    "title": "导出数据",
+    "selectPets": "选择宠物",
+    "allPets": "全部宠物",
+    "dateRange": "日期范围",
+    "lastWeek": "最近7天",
+    "lastMonth": "最近30天",
+    "allTime": "全部时间",
+    "export": "导出 CSV",
+    "exporting": "导出中...",
+    "success": "导出成功！",
+    "error": "导出数据失败"
+  },
+  "backup": {
+    "title": "备份与恢复",
+    "createBackup": "创建备份",
+    "restoreBackup": "恢复备份",
+    "backupDescription": "将所有数据导出为 JSON 文件",
+    "restoreDescription": "从备份文件导入数据",
+    "restoreWarning": "这将替换所有现有数据。确定要继续吗？",
+    "backupSuccess": "备份创建成功！",
+    "restoreSuccess": "数据恢复成功！",
+    "error": "操作失败"
+  },
+  "notifications": {
+    "dailyReminderTitle": "健康检查时间！",
+    "dailyReminderBody": "别忘了今天记录您宠物的健康状况。",
+    "weightAlertTitle": "体重警报",
+    "weightAlertBody": "{{name}}的体重下降了{{percent}}%"
+  },
+  "validation": {
+    "nameRequired": "名字是必填项",
+    "birthdayRequired": "生日是必填项",
+    "invalidDateFormat": "请使用格式：YYYY-MM-DD",
+    "invalidDate": "日期无效",
+    "futureBirthday": "生日不能是未来的日期"
+  },
+  "errors": {
+    "failedToLoad": "加载数据失败",
+    "failedToSave": "保存失败，请重试。",
+    "failedToDelete": "删除失败",
+    "failedToAddPet": "添加宠物失败，请重试。",
+    "failedToUpdatePet": "更新宠物失败，请重试。"
+  }
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,19 +7,21 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { getPetById, updatePet } from "@/src/db/queries";
+import { updatePetImage } from "@/src/utils/imageStorage";
 import { usePetStore } from "@/src/store/petStore";
-import { saveImageToStorage } from "@/src/utils/imageStorage";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 import {
   type PetSpecies,
   type Gender,
+  type Pet,
   SPECIES_NAMES,
-  SPECIES_DEFAULT_WEIGHTS,
 } from "@/src/types";
 import { clsx } from "clsx";
 
@@ -37,9 +39,14 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "unknown", label: "Unknown" },
 ];
 
-export default function AddPetModal() {
+export default function EditPetModal() {
   const router = useRouter();
-  const { addPet, recordWeight, isLoading } = usePetStore();
+  const { petId } = useLocalSearchParams<{ petId: string }>();
+  const { loadPets } = usePetStore();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pet, setPet] = useState<Pet | null>(null);
 
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<PetSpecies>("rat");
@@ -47,6 +54,32 @@ export default function AddPetModal() {
   const [birthday, setBirthday] = useState("");
   const [photoUri, setPhotoUri] = useState<string>();
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const loadPet = async () => {
+      if (!petId) return;
+
+      try {
+        const petData = await getPetById(Number(petId));
+        if (petData) {
+          setPet(petData);
+          setName(petData.name);
+          setSpecies(petData.species);
+          setGender(petData.gender);
+          setBirthday(petData.birthday);
+          setPhotoUri(petData.photoUri);
+        }
+      } catch (error) {
+        console.error("Failed to load pet:", error);
+        Alert.alert("Error", "Failed to load pet data.");
+        router.back();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPet();
+  }, [petId, router]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -90,44 +123,55 @@ export default function AddPetModal() {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm() || !petId) return;
 
+    setIsSaving(true);
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      let finalPhotoUri = photoUri;
 
-      // Save photo to persistent storage if provided
-      let persistentPhotoUri: string | undefined;
-      if (photoUri) {
-        persistentPhotoUri = await saveImageToStorage(photoUri, "new");
+      // If photo changed, update with persistent storage
+      if (photoUri && photoUri !== pet?.photoUri) {
+        const newPhotoUri = await updatePetImage(
+          photoUri,
+          Number(petId),
+          pet?.photoUri
+        );
+        finalPhotoUri = newPhotoUri ?? photoUri;
       }
 
-      const pet = await addPet({
+      await updatePet(Number(petId), {
         name: name.trim(),
         species,
         gender,
         birthday,
-        photoUri: persistentPhotoUri,
+        photoUri: finalPhotoUri,
       });
 
-      // Update photo path with actual pet ID if we saved one
-      if (persistentPhotoUri) {
-        const finalPhotoUri = await saveImageToStorage(photoUri, pet.id);
-        if (finalPhotoUri && finalPhotoUri !== persistentPhotoUri) {
-          // Update pet record with final photo URI
-          const { updatePet } = await import("@/src/db/queries");
-          await updatePet(pet.id, { photoUri: finalPhotoUri });
-        }
-      }
-
-      // Add initial weight based on species default
-      const defaultWeight = SPECIES_DEFAULT_WEIGHTS[species];
-      await recordWeight(pet.id, defaultWeight);
-
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      await loadPets(); // Refresh home list
       router.back();
     } catch (error) {
-      Alert.alert("Error", "Failed to add pet. Please try again.");
+      Alert.alert("Error", "Failed to update pet. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#ed7a11" />
+      </View>
+    );
+  }
+
+  if (!pet) {
+    return (
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-500">Pet not found</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -148,7 +192,7 @@ export default function AddPetModal() {
             ) : (
               <View className="items-center">
                 <Text className="text-3xl mb-1">📷</Text>
-                <Text className="text-xs text-primary-600">Add Photo</Text>
+                <Text className="text-xs text-primary-600">Change Photo</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -232,19 +276,11 @@ export default function AddPetModal() {
             keyboardType="numbers-and-punctuation"
           />
 
-          {/* Default Weight Info */}
-          <View className="bg-primary-50 p-4 rounded-xl">
-            <Text className="text-sm text-primary-800">
-              Initial weight will be set to {SPECIES_DEFAULT_WEIGHTS[species]}g
-              (typical for {SPECIES_NAMES[species].toLowerCase()})
-            </Text>
-          </View>
-
           {/* Submit Button */}
           <Button
-            title="Add Pet"
+            title="Save Changes"
             onPress={handleSubmit}
-            loading={isLoading}
+            loading={isSaving}
             className="mt-4"
           />
         </View>

@@ -30,7 +30,24 @@ async function initDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
     );
   `);
 
-  // Create weight_logs table
+  // Create daily_records table (replaces weight_logs and health_logs)
+  // Each pet has at most one record per day
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS daily_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      pet_id INTEGER NOT NULL,
+      record_date TEXT NOT NULL,
+      weight REAL,
+      observations TEXT NOT NULL DEFAULT '[]',
+      notes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(pet_id, record_date),
+      FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Keep legacy tables for backward compatibility (migration)
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS weight_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +58,6 @@ async function initDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
     );
   `);
 
-  // Create health_logs table
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS health_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,6 +71,8 @@ async function initDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
 
   // Create indexes for better query performance
   await database.execAsync(`
+    CREATE INDEX IF NOT EXISTS idx_daily_records_pet_id ON daily_records(pet_id);
+    CREATE INDEX IF NOT EXISTS idx_daily_records_date ON daily_records(record_date);
     CREATE INDEX IF NOT EXISTS idx_weight_logs_pet_id ON weight_logs(pet_id);
     CREATE INDEX IF NOT EXISTS idx_weight_logs_recorded_at ON weight_logs(recorded_at);
     CREATE INDEX IF NOT EXISTS idx_health_logs_pet_id ON health_logs(pet_id);

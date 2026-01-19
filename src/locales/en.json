@@ -1,0 +1,143 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK"
+  },
+  "tabs": {
+    "home": "Home",
+    "record": "Record",
+    "wiki": "Wiki",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "My Pets",
+    "noPets": "No pets yet",
+    "addFirstPet": "Add your first pet to start tracking their health!",
+    "addPet": "Add Pet",
+    "noData": "No data"
+  },
+  "pet": {
+    "details": "Pet Details",
+    "name": "Name",
+    "species": "Species",
+    "gender": "Gender",
+    "birthday": "Birthday",
+    "age": "Age",
+    "photo": "Photo",
+    "addPhoto": "Add Photo",
+    "changePhoto": "Change Photo",
+    "male": "Male",
+    "female": "Female",
+    "unknown": "Unknown",
+    "rat": "Rat",
+    "guineaPig": "Guinea Pig",
+    "hamster": "Hamster",
+    "gerbil": "Gerbil",
+    "mouse": "Mouse",
+    "deletePet": "Delete Pet",
+    "deleteConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "editPet": "Edit Pet",
+    "addPetTitle": "Add Pet",
+    "saveChanges": "Save Changes",
+    "initialWeight": "Initial weight will be set to {{weight}}g (typical for {{species}})"
+  },
+  "record": {
+    "title": "Quick Record",
+    "todayRecord": "Today's Record",
+    "weight": "Weight",
+    "observations": "Health Observations",
+    "notes": "Notes",
+    "unsaved": "Unsaved",
+    "saved": "Saved",
+    "saveChanges": "Save Changes",
+    "weightTrend": "Weight Trend",
+    "history": "History",
+    "week": "Week",
+    "month": "Month",
+    "noHistory": "No history yet",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "observations": {
+    "normal": "Normal",
+    "sneeze": "Sneeze",
+    "porphyrin": "Porphyrin",
+    "softStool": "Soft Stool",
+    "lethargic": "Lethargic",
+    "lossOfAppetite": "Loss of Appetite"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "notifications": "Notifications",
+    "dailyReminder": "Daily Reminder",
+    "reminderTime": "Reminder Time",
+    "reminderDescription": "Get reminded to record your pet's health data",
+    "healthAlerts": "Health Alerts",
+    "healthAlertsDescription": "Get notified when weight drops significantly",
+    "dataManagement": "Data Management",
+    "exportData": "Export Data",
+    "exportDescription": "Export health records as CSV",
+    "backup": "Backup",
+    "backupDescription": "Backup and restore your data",
+    "about": "About",
+    "version": "Version",
+    "appName": "Pocket Squeak"
+  },
+  "export": {
+    "title": "Export Data",
+    "selectPets": "Select Pets",
+    "allPets": "All Pets",
+    "dateRange": "Date Range",
+    "lastWeek": "Last 7 days",
+    "lastMonth": "Last 30 days",
+    "allTime": "All time",
+    "export": "Export CSV",
+    "exporting": "Exporting...",
+    "success": "Export successful!",
+    "error": "Failed to export data"
+  },
+  "backup": {
+    "title": "Backup & Restore",
+    "createBackup": "Create Backup",
+    "restoreBackup": "Restore Backup",
+    "backupDescription": "Export all your data as a JSON file",
+    "restoreDescription": "Import data from a backup file",
+    "restoreWarning": "This will replace all existing data. Are you sure?",
+    "backupSuccess": "Backup created successfully!",
+    "restoreSuccess": "Data restored successfully!",
+    "error": "Operation failed"
+  },
+  "notifications": {
+    "dailyReminderTitle": "Health Check Time!",
+    "dailyReminderBody": "Don't forget to record your pet's health today.",
+    "weightAlertTitle": "Weight Alert",
+    "weightAlertBody": "{{name}}'s weight has dropped by {{percent}}%"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "birthdayRequired": "Birthday is required",
+    "invalidDateFormat": "Use format: YYYY-MM-DD",
+    "invalidDate": "Invalid date",
+    "futureBirthday": "Birthday cannot be in the future"
+  },
+  "errors": {
+    "failedToLoad": "Failed to load data",
+    "failedToSave": "Failed to save. Please try again.",
+    "failedToDelete": "Failed to delete",
+    "failedToAddPet": "Failed to add pet. Please try again.",
+    "failedToUpdatePet": "Failed to update pet. Please try again."
+  }
+}

@@ -39,3 +39,15 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# IDE
+.idea/
+.vscode/
+
+# Serena
+.serena/
+
+# Secrets (never commit these)
+google-services.json
+GoogleService-Info.plist
+*.keystore

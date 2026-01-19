@@ -2,8 +2,14 @@
 export type PetSpecies = "rat" | "guinea_pig" | "hamster" | "gerbil" | "mouse";
 export type Gender = "male" | "female" | "unknown";
 
-// Health tag types
-export type HealthTag = "sneeze" | "porphyrin" | "soft_stool" | "lethargic";
+// Preset observation tags (for quick selection)
+export type PresetObservation =
+  | "sneeze"
+  | "porphyrin"
+  | "soft_stool"
+  | "lethargic"
+  | "loss_of_appetite"
+  | "normal";
 
 // Food safety levels
 export type FoodSafety = "safe" | "caution" | "danger";
@@ -20,19 +26,32 @@ export interface Pet {
   updatedAt: string;
 }
 
+// Daily record - one per pet per day
+export interface DailyRecord {
+  id: number;
+  petId: number;
+  recordDate: string; // 'YYYY-MM-DD' format
+  weight?: number; // in grams
+  observations: string[]; // can be preset tags or custom text
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Legacy types (for backward compatibility)
 export interface WeightLog {
   id: number;
   petId: number;
-  weight: number; // in grams
-  recordedAt: string; // ISO datetime string
+  weight: number;
+  recordedAt: string;
 }
 
 export interface HealthLog {
   id: number;
   petId: number;
-  tags: HealthTag[];
+  tags: string[];
   notes?: string;
-  recordedAt: string; // ISO datetime string
+  recordedAt: string;
 }
 
 export interface FoodItem {
@@ -54,8 +73,8 @@ export interface PetFormData {
 
 export interface RecordFormData {
   petId: number;
-  weight: number;
-  healthTags: HealthTag[];
+  weight?: number;
+  observations: string[];
   notes?: string;
 }
 
@@ -83,13 +102,15 @@ export const SPECIES_NAMES: Record<PetSpecies, string> = {
   mouse: "Mouse",
 };
 
-// Health tag display info
-export const HEALTH_TAG_INFO: Record<
-  HealthTag,
-  { label: string; emoji: string }
+// Preset observation display info
+export const OBSERVATION_PRESETS: Record<
+  PresetObservation,
+  { label: string; emoji: string; color: string }
 > = {
-  sneeze: { label: "Sneeze", emoji: "🤧" },
-  porphyrin: { label: "Porphyrin", emoji: "👁️" },
-  soft_stool: { label: "Soft Stool", emoji: "💩" },
-  lethargic: { label: "Lethargic", emoji: "😴" },
+  normal: { label: "Normal", emoji: "✅", color: "green" },
+  sneeze: { label: "Sneeze", emoji: "🤧", color: "yellow" },
+  porphyrin: { label: "Porphyrin", emoji: "👁️", color: "red" },
+  soft_stool: { label: "Soft Stool", emoji: "💩", color: "yellow" },
+  lethargic: { label: "Lethargic", emoji: "😴", color: "red" },
+  loss_of_appetite: { label: "Loss of Appetite", emoji: "🍽️", color: "red" },
 };
