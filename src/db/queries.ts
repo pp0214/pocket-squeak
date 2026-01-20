@@ -7,6 +7,7 @@ import type {
   DailyRecord,
   PetWithLatestWeight,
 } from "../types";
+import { safeJsonParse } from "../utils/helpers";
 
 // ============ PET CRUD ============
 
@@ -262,7 +263,7 @@ export async function upsertDailyRecord(
   if (existing) {
     // Update existing record
     const newWeight = data.weight ?? existing.weight;
-    const existingObs = JSON.parse(existing.observations) as string[];
+    const existingObs = safeJsonParse<string[]>(existing.observations, []);
     const newObs = data.observations
       ? [...new Set([...existingObs, ...data.observations])]
       : existingObs;
@@ -346,7 +347,7 @@ export async function getTodayRecord(
     petId: row.pet_id,
     recordDate: row.record_date,
     weight: row.weight ?? undefined,
-    observations: JSON.parse(row.observations) as string[],
+    observations: safeJsonParse<string[]>(row.observations, []),
     notes: row.notes ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -383,7 +384,7 @@ export async function getDailyRecords(
     petId: row.pet_id,
     recordDate: row.record_date,
     weight: row.weight ?? undefined,
-    observations: JSON.parse(row.observations) as string[],
+    observations: safeJsonParse<string[]>(row.observations, []),
     notes: row.notes ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -421,7 +422,7 @@ export async function getAllPetRecordsForDateRange(
     petId: row.pet_id,
     recordDate: row.record_date,
     weight: row.weight ?? undefined,
-    observations: JSON.parse(row.observations) as string[],
+    observations: safeJsonParse<string[]>(row.observations, []),
     notes: row.notes ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -473,7 +474,7 @@ export async function getPetHealthHistory(
   return rows.map((row) => ({
     id: row.id,
     petId: row.pet_id,
-    tags: JSON.parse(row.tags) as string[],
+    tags: safeJsonParse<string[]>(row.tags, []),
     notes: row.notes ?? undefined,
     recordedAt: row.recorded_at,
   }));
@@ -542,22 +543,72 @@ export async function seedMockHistory(petId: number): Promise<void> {
 
 // ============ COMBINED QUERIES ============
 
+/**
+ * Get all pets with their latest weight and weight change percentage.
+ * Optimized to use a single query with subqueries instead of N+1 queries.
+ */
 export async function getPetsWithLatestWeight(): Promise<
   PetWithLatestWeight[]
 > {
-  const pets = await getPets();
+  const db = await getDatabase();
 
-  const results: PetWithLatestWeight[] = await Promise.all(
-    pets.map(async (pet) => {
-      const latestWeight = await getLatestWeight(pet.id);
-      const weightChange = await getWeightChange(pet.id);
-      return {
-        ...pet,
-        latestWeight: latestWeight?.weight,
-        weightChange,
-      };
-    }),
-  );
+  // Single query that gets pets with their latest weight and calculates weight change
+  // Uses correlated subqueries to avoid N+1 problem
+  const rows = await db.getAllAsync<{
+    id: number;
+    name: string;
+    species: string;
+    gender: string;
+    birthday: string;
+    photo_uri: string | null;
+    created_at: string;
+    updated_at: string;
+    latest_weight: number | null;
+    previous_weight: number | null;
+  }>(`
+    SELECT
+      p.*,
+      (
+        SELECT weight
+        FROM weight_logs
+        WHERE pet_id = p.id
+        ORDER BY recorded_at DESC
+        LIMIT 1
+      ) as latest_weight,
+      (
+        SELECT weight
+        FROM weight_logs
+        WHERE pet_id = p.id
+        ORDER BY recorded_at DESC
+        LIMIT 1 OFFSET 1
+      ) as previous_weight
+    FROM pets p
+    ORDER BY p.created_at DESC
+  `);
 
-  return results;
+  return rows.map((row) => {
+    // Calculate weight change percentage
+    let weightChange: number | undefined;
+    if (
+      row.latest_weight !== null &&
+      row.previous_weight !== null &&
+      row.previous_weight > 0
+    ) {
+      weightChange =
+        ((row.latest_weight - row.previous_weight) / row.previous_weight) * 100;
+    }
+
+    return {
+      id: row.id,
+      name: row.name,
+      species: row.species as Pet["species"],
+      gender: row.gender as Pet["gender"],
+      birthday: row.birthday,
+      photoUri: row.photo_uri ?? undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      latestWeight: row.latest_weight ?? undefined,
+      weightChange,
+    };
+  });
 }

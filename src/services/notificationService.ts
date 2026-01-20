@@ -17,6 +17,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -71,12 +73,18 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
 
     return {
       dailyReminderEnabled: enabled === "true",
-      dailyReminderHour: hour ? parseInt(hour, 10) : DEFAULT_SETTINGS.dailyReminderHour,
-      dailyReminderMinute: minute ? parseInt(minute, 10) : DEFAULT_SETTINGS.dailyReminderMinute,
+      dailyReminderHour: hour
+        ? parseInt(hour, 10)
+        : DEFAULT_SETTINGS.dailyReminderHour,
+      dailyReminderMinute: minute
+        ? parseInt(minute, 10)
+        : DEFAULT_SETTINGS.dailyReminderMinute,
       healthAlertsEnabled: healthAlerts !== "false", // Default to true
     };
   } catch (error) {
-    console.error("Failed to load notification settings:", error);
+    if (__DEV__) {
+      console.error("Failed to load notification settings:", error);
+    }
     return DEFAULT_SETTINGS;
   }
 }
@@ -85,7 +93,7 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
  * Save notification settings
  */
 export async function saveNotificationSettings(
-  settings: Partial<NotificationSettings>
+  settings: Partial<NotificationSettings>,
 ): Promise<void> {
   try {
     const updates: Promise<void>[] = [];
@@ -94,51 +102,68 @@ export async function saveNotificationSettings(
       updates.push(
         AsyncStorage.setItem(
           DAILY_REMINDER_ENABLED_KEY,
-          String(settings.dailyReminderEnabled)
-        )
+          String(settings.dailyReminderEnabled),
+        ),
       );
     }
     if (settings.dailyReminderHour !== undefined) {
       updates.push(
         AsyncStorage.setItem(
           DAILY_REMINDER_HOUR_KEY,
-          String(settings.dailyReminderHour)
-        )
+          String(settings.dailyReminderHour),
+        ),
       );
     }
     if (settings.dailyReminderMinute !== undefined) {
       updates.push(
         AsyncStorage.setItem(
           DAILY_REMINDER_MINUTE_KEY,
-          String(settings.dailyReminderMinute)
-        )
+          String(settings.dailyReminderMinute),
+        ),
       );
     }
     if (settings.healthAlertsEnabled !== undefined) {
       updates.push(
         AsyncStorage.setItem(
           HEALTH_ALERTS_ENABLED_KEY,
-          String(settings.healthAlertsEnabled)
-        )
+          String(settings.healthAlertsEnabled),
+        ),
       );
     }
 
     await Promise.all(updates);
   } catch (error) {
-    console.error("Failed to save notification settings:", error);
+    if (__DEV__) {
+      console.error("Failed to save notification settings:", error);
+    }
     throw error;
   }
 }
 
 /**
+ * Check if notification permissions are granted
+ */
+export async function hasNotificationPermission(): Promise<boolean> {
+  const { status } = await Notifications.getPermissionsAsync();
+  return status === "granted";
+}
+
+/**
  * Schedule daily reminder notification
+ * @throws Error if notification permissions are not granted
  */
 export async function scheduleDailyReminder(
   hour: number,
   minute: number,
   title: string,
-  body: string
+  body: string,
 ): Promise<void> {
+  // Check permissions before scheduling
+  const hasPermission = await hasNotificationPermission();
+  if (!hasPermission) {
+    throw new Error("Notification permissions not granted");
+  }
+
   // Cancel existing daily reminder
   await cancelDailyReminder();
 
@@ -170,7 +195,7 @@ export async function cancelDailyReminder(): Promise<void> {
  */
 export async function sendHealthAlert(
   title: string,
-  body: string
+  body: string,
 ): Promise<void> {
   const settings = await getNotificationSettings();
   if (!settings.healthAlertsEnabled) return;
@@ -190,7 +215,7 @@ export async function sendHealthAlert(
  */
 export async function updateDailyReminderFromSettings(
   title: string,
-  body: string
+  body: string,
 ): Promise<void> {
   const settings = await getNotificationSettings();
 
@@ -199,7 +224,7 @@ export async function updateDailyReminderFromSettings(
       settings.dailyReminderHour,
       settings.dailyReminderMinute,
       title,
-      body
+      body,
     );
   } else {
     await cancelDailyReminder();

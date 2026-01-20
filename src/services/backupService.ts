@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { getDatabase } from "../db/db";
@@ -38,9 +38,13 @@ export async function createBackup(): Promise<string> {
   const filename = `pocket_squeak_backup_${new Date().toISOString().split("T")[0]}.json`;
   const filepath = `${FileSystem.documentDirectory}${filename}`;
 
-  await FileSystem.writeAsStringAsync(filepath, JSON.stringify(backup, null, 2), {
-    encoding: FileSystem.EncodingType.UTF8,
-  });
+  await FileSystem.writeAsStringAsync(
+    filepath,
+    JSON.stringify(backup, null, 2),
+    {
+      encoding: FileSystem.EncodingType.UTF8,
+    },
+  );
 
   return filepath;
 }
@@ -144,7 +148,7 @@ export async function restoreBackup(filepath: string): Promise<void> {
           pet.photoUri ?? null,
           pet.createdAt,
           pet.updatedAt,
-        ]
+        ],
       );
     }
 
@@ -162,13 +166,20 @@ export async function restoreBackup(filepath: string): Promise<void> {
           record.notes ?? null,
           record.createdAt,
           record.updatedAt,
-        ]
+        ],
       );
     }
 
     await db.execAsync("COMMIT");
   } catch (error) {
-    await db.execAsync("ROLLBACK");
+    // Wrap rollback in its own try-catch to prevent masking original error
+    try {
+      await db.execAsync("ROLLBACK");
+    } catch (rollbackError) {
+      if (__DEV__) {
+        console.error("Failed to rollback transaction:", rollbackError);
+      }
+    }
     throw error;
   }
 }

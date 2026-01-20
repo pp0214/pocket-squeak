@@ -1,205 +1,285 @@
 [
   {
     "id": "apple",
-    "name": "Apple",
-    "category": "Fruits",
-    "safety": "safe",
-    "notes": "Remove seeds (contain cyanide). Feed in moderation due to sugar content."
+    "category": "fruits",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "banana",
-    "name": "Banana",
-    "category": "Fruits",
-    "safety": "safe",
-    "notes": "High in sugar, feed sparingly as a treat."
+    "category": "fruits",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "blueberry",
-    "name": "Blueberry",
-    "category": "Fruits",
-    "safety": "safe",
-    "notes": "Excellent antioxidants. Can stain fur temporarily."
+    "category": "fruits",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "grape",
-    "name": "Grape",
-    "category": "Fruits",
-    "safety": "caution",
-    "notes": "Cut in half to prevent choking. Remove seeds. High in sugar."
+    "category": "fruits",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "strawberry",
+    "category": "fruits",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "watermelon",
+    "category": "fruits",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "orange",
-    "name": "Orange",
-    "category": "Fruits",
-    "safety": "caution",
-    "notes": "MALE RATS ONLY - d-limonene in citrus may cause kidney issues in male rats."
+    "category": "fruits",
+    "defaultSafety": "caution",
+    "speciesSafety": {
+      "guinea_pig": "safe"
+    },
+    "recommendedFor": ["guinea_pig"]
   },
   {
     "id": "avocado",
-    "name": "Avocado",
-    "category": "Fruits",
-    "safety": "danger",
-    "notes": "Contains persin which is toxic to small animals."
+    "category": "fruits",
+    "defaultSafety": "danger",
+    "speciesSafety": {},
+    "recommendedFor": []
   },
   {
     "id": "broccoli",
-    "name": "Broccoli",
-    "category": "Vegetables",
-    "safety": "safe",
-    "notes": "Can be fed raw or cooked. May cause gas in large amounts."
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "carrot",
-    "name": "Carrot",
-    "category": "Vegetables",
-    "safety": "safe",
-    "notes": "Great for teeth health. Can be fed raw or cooked."
-  },
-  {
-    "id": "spinach",
-    "name": "Spinach",
-    "category": "Vegetables",
-    "safety": "caution",
-    "notes": "High in oxalates. Feed sparingly to avoid calcium binding."
-  },
-  {
-    "id": "onion",
-    "name": "Onion",
-    "category": "Vegetables",
-    "safety": "danger",
-    "notes": "Toxic to rodents. Can cause anemia and digestive issues."
-  },
-  {
-    "id": "garlic",
-    "name": "Garlic",
-    "category": "Vegetables",
-    "safety": "danger",
-    "notes": "Toxic to rodents. Avoid all forms including powder."
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "cucumber",
-    "name": "Cucumber",
-    "category": "Vegetables",
-    "safety": "safe",
-    "notes": "Good hydration source. Low in calories."
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
-    "id": "bell_pepper",
-    "name": "Bell Pepper",
-    "category": "Vegetables",
-    "safety": "safe",
-    "notes": "High in Vitamin C. All colors are safe."
+    "id": "bellPepper",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "spinach",
+    "category": "vegetables",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "kale",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["guinea_pig", "rat"]
+  },
+  {
+    "id": "celery",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["guinea_pig", "rat"]
+  },
+  {
+    "id": "pumpkin",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "sweetPotato",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "corn",
+    "category": "vegetables",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
+  },
+  {
+    "id": "peas",
+    "category": "vegetables",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "tomato",
-    "name": "Tomato",
-    "category": "Vegetables",
-    "safety": "caution",
-    "notes": "Flesh is safe, but leaves and stems are toxic."
+    "category": "vegetables",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
+  },
+  {
+    "id": "onion",
+    "category": "vegetables",
+    "defaultSafety": "danger",
+    "speciesSafety": {},
+    "recommendedFor": []
+  },
+  {
+    "id": "garlic",
+    "category": "vegetables",
+    "defaultSafety": "danger",
+    "speciesSafety": {},
+    "recommendedFor": []
+  },
+  {
+    "id": "parsley",
+    "category": "herbs",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["guinea_pig", "rat"]
+  },
+  {
+    "id": "cilantro",
+    "category": "herbs",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["guinea_pig", "rat"]
   },
   {
     "id": "chicken",
-    "name": "Chicken",
-    "category": "Protein",
-    "safety": "safe",
-    "notes": "Cooked only, no seasoning. Great protein source."
+    "category": "protein",
+    "defaultSafety": "safe",
+    "speciesSafety": {
+      "guinea_pig": "danger"
+    },
+    "recommendedFor": ["rat"]
   },
   {
     "id": "egg",
-    "name": "Egg",
-    "category": "Protein",
-    "safety": "safe",
-    "notes": "Cooked only (scrambled or hard-boiled). High in protein."
+    "category": "protein",
+    "defaultSafety": "safe",
+    "speciesSafety": {
+      "guinea_pig": "danger"
+    },
+    "recommendedFor": ["rat"]
   },
   {
     "id": "mealworm",
-    "name": "Mealworm",
-    "category": "Protein",
-    "safety": "safe",
-    "notes": "Excellent protein source for rats. Can be fed live or dried."
+    "category": "protein",
+    "defaultSafety": "safe",
+    "speciesSafety": {
+      "guinea_pig": "danger"
+    },
+    "recommendedFor": ["rat"]
   },
   {
     "id": "cheese",
-    "name": "Cheese",
-    "category": "Dairy",
-    "safety": "caution",
-    "notes": "Despite stereotypes, feed sparingly. Some rodents are lactose intolerant."
+    "category": "dairy",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
     "id": "yogurt",
-    "name": "Yogurt",
-    "category": "Dairy",
-    "safety": "safe",
-    "notes": "Plain, unsweetened only. Good for probiotics."
-  },
-  {
-    "id": "chocolate",
-    "name": "Chocolate",
-    "category": "Sweets",
-    "safety": "danger",
-    "notes": "Toxic to rodents. Contains theobromine."
-  },
-  {
-    "id": "peanut_butter",
-    "name": "Peanut Butter",
-    "category": "Nuts & Seeds",
-    "safety": "caution",
-    "notes": "Can cause choking due to stickiness. Thin spread only."
-  },
-  {
-    "id": "almond",
-    "name": "Almond",
-    "category": "Nuts & Seeds",
-    "safety": "safe",
-    "notes": "Unsalted only. Good occasional treat."
-  },
-  {
-    "id": "sunflower_seed",
-    "name": "Sunflower Seed",
-    "category": "Nuts & Seeds",
-    "safety": "safe",
-    "notes": "High in fat, feed sparingly. Unsalted only."
+    "category": "dairy",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
     "id": "oats",
-    "name": "Oats",
-    "category": "Grains",
-    "safety": "safe",
-    "notes": "Plain rolled oats are excellent. Good fiber source."
+    "category": "grains",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat", "guinea_pig"]
   },
   {
     "id": "rice",
-    "name": "Rice",
-    "category": "Grains",
-    "safety": "safe",
-    "notes": "Cooked brown rice is healthier than white."
+    "category": "grains",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
     "id": "bread",
-    "name": "Bread",
-    "category": "Grains",
-    "safety": "caution",
-    "notes": "Whole grain only. Can expand in stomach, feed small amounts."
+    "category": "grains",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
     "id": "pasta",
-    "name": "Pasta",
-    "category": "Grains",
-    "safety": "safe",
-    "notes": "Cooked, plain pasta. Whole wheat is preferable."
+    "category": "grains",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
-    "id": "hay",
-    "name": "Timothy Hay",
-    "category": "Hay",
-    "safety": "safe",
-    "notes": "Essential for guinea pigs. Good for dental health."
+    "id": "sunflowerSeed",
+    "category": "nutsSeeds",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
   },
   {
-    "id": "alfalfa_hay",
-    "name": "Alfalfa Hay",
-    "category": "Hay",
-    "safety": "caution",
-    "notes": "High in calcium. Only for young/pregnant guinea pigs."
+    "id": "almond",
+    "category": "nutsSeeds",
+    "defaultSafety": "safe",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
+  },
+  {
+    "id": "peanutButter",
+    "category": "nutsSeeds",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["rat"]
+  },
+  {
+    "id": "timothyHay",
+    "category": "hay",
+    "defaultSafety": "safe",
+    "speciesSafety": {
+      "rat": "caution"
+    },
+    "recommendedFor": ["guinea_pig"]
+  },
+  {
+    "id": "alfalfaHay",
+    "category": "hay",
+    "defaultSafety": "caution",
+    "speciesSafety": {},
+    "recommendedFor": ["guinea_pig"]
+  },
+  {
+    "id": "chocolate",
+    "category": "sweets",
+    "defaultSafety": "danger",
+    "speciesSafety": {},
+    "recommendedFor": []
   }
 ]

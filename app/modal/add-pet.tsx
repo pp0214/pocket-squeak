@@ -4,21 +4,21 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { usePetStore } from "@/src/store/petStore";
 import { saveImageToStorage } from "@/src/utils/imageStorage";
 import { Input } from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
+import { useToast } from "@/src/contexts/ToastContext";
 import {
   type PetSpecies,
   type Gender,
-  SPECIES_NAMES,
   SPECIES_DEFAULT_WEIGHTS,
 } from "@/src/types";
 import { clsx } from "clsx";
@@ -26,19 +26,14 @@ import { clsx } from "clsx";
 const SPECIES_OPTIONS: { value: PetSpecies; emoji: string }[] = [
   { value: "rat", emoji: "🐀" },
   { value: "guinea_pig", emoji: "🐹" },
-  { value: "hamster", emoji: "🐹" },
-  { value: "gerbil", emoji: "🐭" },
-  { value: "mouse", emoji: "🐭" },
 ];
 
-const GENDER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "unknown", label: "Unknown" },
-];
+const GENDER_OPTIONS: Gender[] = ["male", "female", "unknown"];
 
 export default function AddPetModal() {
+  const { t } = useTranslation();
   const router = useRouter();
+  const toast = useToast();
   const { addPet, recordWeight, isLoading } = usePetStore();
 
   const [name, setName] = useState("");
@@ -52,22 +47,22 @@ export default function AddPetModal() {
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = t("validation.nameRequired");
     }
 
     if (!birthday.trim()) {
-      newErrors.birthday = "Birthday is required";
+      newErrors.birthday = t("validation.birthdayRequired");
     } else {
       // Validate date format (YYYY-MM-DD)
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(birthday)) {
-        newErrors.birthday = "Use format: YYYY-MM-DD";
+        newErrors.birthday = t("validation.invalidDateFormat");
       } else {
         const date = new Date(birthday);
         if (isNaN(date.getTime())) {
-          newErrors.birthday = "Invalid date";
+          newErrors.birthday = t("validation.invalidDate");
         } else if (date > new Date()) {
-          newErrors.birthday = "Birthday cannot be in the future";
+          newErrors.birthday = t("validation.futureBirthday");
         }
       }
     }
@@ -110,7 +105,7 @@ export default function AddPetModal() {
       });
 
       // Update photo path with actual pet ID if we saved one
-      if (persistentPhotoUri) {
+      if (persistentPhotoUri && photoUri) {
         const finalPhotoUri = await saveImageToStorage(photoUri, pet.id);
         if (finalPhotoUri && finalPhotoUri !== persistentPhotoUri) {
           // Update pet record with final photo URI
@@ -125,7 +120,7 @@ export default function AddPetModal() {
 
       router.back();
     } catch (error) {
-      Alert.alert("Error", "Failed to add pet. Please try again.");
+      toast.error(t("errors.failedToAddPet"));
     }
   };
 
@@ -148,24 +143,28 @@ export default function AddPetModal() {
             ) : (
               <View className="items-center">
                 <Text className="text-3xl mb-1">📷</Text>
-                <Text className="text-xs text-primary-600">Add Photo</Text>
+                <Text className="text-xs text-primary-600">
+                  {t("pet.addPhoto")}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
 
           {/* Name Input */}
           <Input
-            label="Name"
+            label={t("pet.name")}
             value={name}
             onChangeText={setName}
-            placeholder="Enter pet name"
+            placeholder={t("pet.enterName")}
             error={errors.name}
             autoCapitalize="words"
           />
 
           {/* Species Selection */}
           <View className="gap-1">
-            <Text className="text-sm font-medium text-gray-700">Species</Text>
+            <Text className="text-sm font-medium text-gray-700">
+              {t("pet.species")}
+            </Text>
             <View className="flex-row flex-wrap gap-2">
               {SPECIES_OPTIONS.map((option) => (
                 <TouchableOpacity
@@ -186,7 +185,7 @@ export default function AddPetModal() {
                       species === option.value ? "text-white" : "text-gray-700",
                     )}
                   >
-                    {SPECIES_NAMES[option.value]}
+                    {t(`species.${option.value}`)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -195,27 +194,29 @@ export default function AddPetModal() {
 
           {/* Gender Selection */}
           <View className="gap-1">
-            <Text className="text-sm font-medium text-gray-700">Gender</Text>
+            <Text className="text-sm font-medium text-gray-700">
+              {t("pet.gender")}
+            </Text>
             <View className="flex-row gap-2">
-              {GENDER_OPTIONS.map((option) => (
+              {GENDER_OPTIONS.map((genderOption) => (
                 <TouchableOpacity
-                  key={option.value}
+                  key={genderOption}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setGender(option.value);
+                    setGender(genderOption);
                   }}
                   className={clsx(
                     "flex-1 py-3 rounded-xl items-center",
-                    gender === option.value ? "bg-primary-500" : "bg-gray-100",
+                    gender === genderOption ? "bg-primary-500" : "bg-gray-100",
                   )}
                 >
                   <Text
                     className={clsx(
                       "font-medium",
-                      gender === option.value ? "text-white" : "text-gray-700",
+                      gender === genderOption ? "text-white" : "text-gray-700",
                     )}
                   >
-                    {option.label}
+                    {t(`pet.${genderOption}`)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -224,10 +225,10 @@ export default function AddPetModal() {
 
           {/* Birthday Input */}
           <Input
-            label="Birthday"
+            label={t("pet.birthday")}
             value={birthday}
             onChangeText={setBirthday}
-            placeholder="YYYY-MM-DD"
+            placeholder={t("pet.birthdayFormat")}
             error={errors.birthday}
             keyboardType="numbers-and-punctuation"
           />
@@ -235,14 +236,16 @@ export default function AddPetModal() {
           {/* Default Weight Info */}
           <View className="bg-primary-50 p-4 rounded-xl">
             <Text className="text-sm text-primary-800">
-              Initial weight will be set to {SPECIES_DEFAULT_WEIGHTS[species]}g
-              (typical for {SPECIES_NAMES[species].toLowerCase()})
+              {t("pet.initialWeight", {
+                weight: SPECIES_DEFAULT_WEIGHTS[species],
+                species: t(`species.${species}`).toLowerCase(),
+              })}
             </Text>
           </View>
 
           {/* Submit Button */}
           <Button
-            title="Add Pet"
+            title={t("pet.addPetButton")}
             onPress={handleSubmit}
             loading={isLoading}
             className="mt-4"

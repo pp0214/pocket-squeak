@@ -1,9 +1,12 @@
 import { useRef } from "react";
 import { View, Text, Image, Alert, TouchableOpacity } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Swipeable } from "react-native-gesture-handler";
+import * as Haptics from "expo-haptics";
 import { Card } from "./ui/Card";
 import { calculateAge } from "../utils/date";
-import { SPECIES_NAMES, type PetWithLatestWeight } from "../types";
+import { type PetWithLatestWeight } from "../types";
+import { HEALTH_THRESHOLDS } from "../config/constants";
 import { clsx } from "clsx";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -16,48 +19,51 @@ interface PetCardProps {
 const SPECIES_EMOJI: Record<string, string> = {
   rat: "🐀",
   guinea_pig: "🐹",
-  hamster: "🐹",
-  gerbil: "🐭",
-  mouse: "🐭",
 };
 
 const SPECIES_COLORS: Record<string, { bg: string; border: string }> = {
   rat: { bg: "bg-orange-100", border: "border-orange-200" },
   guinea_pig: { bg: "bg-amber-100", border: "border-amber-200" },
-  hamster: { bg: "bg-yellow-100", border: "border-yellow-200" },
-  gerbil: { bg: "bg-lime-100", border: "border-lime-200" },
-  mouse: { bg: "bg-cyan-100", border: "border-cyan-200" },
 };
 
 export function PetCard({ pet, onPress, onDelete }: PetCardProps) {
+  const { t } = useTranslation();
   const swipeableRef = useRef<Swipeable>(null);
   const age = calculateAge(pet.birthday);
   const hasWeightWarning =
-    pet.weightChange !== undefined && pet.weightChange < -5;
-  const hasWeightGain = pet.weightChange !== undefined && pet.weightChange > 5;
+    pet.weightChange !== undefined &&
+    pet.weightChange < HEALTH_THRESHOLDS.WEIGHT_LOSS_WARNING;
+  const hasWeightGain =
+    pet.weightChange !== undefined &&
+    pet.weightChange > HEALTH_THRESHOLDS.WEIGHT_GAIN_NOTABLE;
   const colors = SPECIES_COLORS[pet.species] || SPECIES_COLORS.rat;
 
   const handleDelete = () => {
     swipeableRef.current?.close();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
-      "Delete Pet",
-      `Are you sure you want to delete ${pet.name}? This action cannot be undone.`,
+      t("home.deleteConfirmTitle"),
+      t("home.deleteConfirmMessage", { name: pet.name }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
-          onPress: () => onDelete?.(pet.id),
+          onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            onDelete?.(pet.id);
+          },
         },
-      ]
+      ],
     );
   };
 
   const handleLongPress = () => {
-    Alert.alert(pet.name, "What would you like to do?", [
-      { text: "Cancel", style: "cancel" },
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(pet.name, t("home.whatToDo"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("common.delete"),
         style: "destructive",
         onPress: handleDelete,
       },
@@ -70,9 +76,10 @@ export function PetCard({ pet, onPress, onDelete }: PetCardProps) {
       <TouchableOpacity
         onPress={handleDelete}
         className="bg-red-500 justify-center items-center px-6 rounded-r-2xl mb-4"
+        activeOpacity={0.8}
       >
         <FontAwesome name="trash" size={24} color="#fff" />
-        <Text className="text-white text-xs mt-1">Delete</Text>
+        <Text className="text-white text-xs mt-1">{t("common.delete")}</Text>
       </TouchableOpacity>
     );
   };
@@ -111,7 +118,7 @@ export function PetCard({ pet, onPress, onDelete }: PetCardProps) {
           <View className="flex-row items-center mt-1">
             <View className="bg-gray-100 rounded-full px-2 py-0.5 mr-2">
               <Text className="text-xs text-gray-600">
-                {SPECIES_NAMES[pet.species]}
+                {t(`species.${pet.species}`)}
               </Text>
             </View>
             <Text className="text-xs text-gray-400">{age}</Text>
@@ -169,7 +176,9 @@ export function PetCard({ pet, onPress, onDelete }: PetCardProps) {
             </View>
           ) : (
             <View className="bg-gray-100 rounded-full px-3 py-1">
-              <Text className="text-xs text-gray-400">No data</Text>
+              <Text className="text-xs text-gray-400">
+                {t("common.noData")}
+              </Text>
             </View>
           )}
         </View>

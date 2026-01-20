@@ -1,17 +1,15 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Switch,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Card } from "@/src/components/ui/Card";
-import { changeLanguage, getCurrentLanguage, supportedLanguages } from "@/src/i18n";
+import {
+  changeLanguage,
+  getCurrentLanguage,
+  supportedLanguages,
+} from "@/src/i18n";
+import { useToast } from "@/src/contexts/ToastContext";
 
 interface SettingItemProps {
   icon: string;
@@ -64,6 +62,7 @@ function SectionHeader({ title }: { title: string }) {
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const toast = useToast();
   const [currentLang, setCurrentLang] = useState(getCurrentLanguage());
 
   const handleLanguageChange = () => {
@@ -74,7 +73,7 @@ export default function SettingsScreen() {
           await changeLanguage(lang.code);
           setCurrentLang(lang.code);
         } catch (error) {
-          Alert.alert(t("common.error"), String(error));
+          toast.error(String(error));
         }
       },
     }));
@@ -86,7 +85,8 @@ export default function SettingsScreen() {
   };
 
   const currentLanguageName =
-    supportedLanguages.find((l) => l.code === currentLang)?.nativeName || "English";
+    supportedLanguages.find((l) => l.code === currentLang)?.nativeName ||
+    "English";
 
   return (
     <ScrollView className="flex-1 bg-gray-50">

@@ -4,9 +4,11 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { I18nextProvider } from "react-i18next";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "react-native-reanimated";
 import "../global.css";
 import i18n, { initI18n } from "@/src/i18n";
+import { ToastProvider } from "@/src/contexts/ToastContext";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -42,64 +44,68 @@ export default function RootLayout() {
   }
 
   return (
-    <I18nextProvider i18n={i18n}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal/add-pet"
-          options={{
-            presentation: "modal",
-            title: "Add Pet",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-        <Stack.Screen
-          name="modal/recorder"
-          options={{
-            presentation: "modal",
-            title: "Quick Record",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-        <Stack.Screen
-          name="modal/edit-pet"
-          options={{
-            presentation: "modal",
-            title: "Edit Pet",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-        <Stack.Screen
-          name="modal/export"
-          options={{
-            presentation: "modal",
-            title: "Export Data",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-        <Stack.Screen
-          name="modal/backup"
-          options={{
-            presentation: "modal",
-            title: "Backup & Restore",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-        <Stack.Screen
-          name="pet/[id]"
-          options={{
-            title: "Pet Details",
-            headerBackTitle: "Back",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontWeight: "600" },
-          }}
-        />
-      </Stack>
-    </I18nextProvider>
+    <SafeAreaProvider>
+      <I18nextProvider i18n={i18n}>
+        <ToastProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="modal/add-pet"
+              options={{
+                presentation: "modal",
+                title: "Add Pet",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+            <Stack.Screen
+              name="modal/recorder"
+              options={{
+                presentation: "modal",
+                title: "Quick Record",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+            <Stack.Screen
+              name="modal/edit-pet"
+              options={{
+                presentation: "modal",
+                title: "Edit Pet",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+            <Stack.Screen
+              name="modal/export"
+              options={{
+                presentation: "modal",
+                title: "Export Data",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+            <Stack.Screen
+              name="modal/backup"
+              options={{
+                presentation: "modal",
+                title: "Backup & Restore",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+            <Stack.Screen
+              name="pet/[id]"
+              options={{
+                title: "Pet Details",
+                headerBackTitle: "Back",
+                headerStyle: { backgroundColor: "#fff" },
+                headerTitleStyle: { fontWeight: "600" },
+              }}
+            />
+          </Stack>
+        </ToastProvider>
+      </I18nextProvider>
+    </SafeAreaProvider>
   );
 }

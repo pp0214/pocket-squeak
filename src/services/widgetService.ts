@@ -1,6 +1,7 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { getPetsWithLatestWeight } from "../db/queries";
 import type { PetWithLatestWeight } from "../types";
+import { HEALTH_THRESHOLDS } from "../config/constants";
 
 // App Group identifier - must match the one configured in Xcode
 const APP_GROUP_IDENTIFIER = "group.com.pocketsqueak.shared";
@@ -30,7 +31,7 @@ function getAppGroupPath(): string | null {
   // On iOS, we need to use the App Group container
   // expo-file-system doesn't directly support this, so we use a workaround
   // The path format is: file:///var/mobile/Containers/Shared/AppGroup/{group-id}/
-  
+
   // For now, use document directory (works for testing)
   // For production, install react-native-shared-group-preferences or similar
   return FileSystem.documentDirectory;
@@ -46,7 +47,9 @@ function transformPetData(pets: PetWithLatestWeight[]): WidgetPetData[] {
     species: pet.species,
     latestWeight: pet.latestWeight,
     weightChange: pet.weightChange,
-    hasAlert: pet.weightChange !== undefined && pet.weightChange <= -5,
+    hasAlert:
+      pet.weightChange !== undefined &&
+      pet.weightChange <= HEALTH_THRESHOLDS.WEIGHT_LOSS_WARNING,
   }));
 }
 
@@ -57,7 +60,9 @@ export async function syncWidgetData(): Promise<void> {
   try {
     const appGroupPath = getAppGroupPath();
     if (!appGroupPath) {
-      console.warn("App Group path not available");
+      if (__DEV__) {
+        console.warn("App Group path not available");
+      }
       return;
     }
 
@@ -72,15 +77,17 @@ export async function syncWidgetData(): Promise<void> {
 
     // Write to shared container
     const filePath = `${appGroupPath}${WIDGET_DATA_FILE}`;
-    await FileSystem.writeAsStringAsync(
-      filePath,
-      JSON.stringify(widgetData),
-      { encoding: FileSystem.EncodingType.UTF8 }
-    );
+    await FileSystem.writeAsStringAsync(filePath, JSON.stringify(widgetData), {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
 
-    console.log("Widget data synced successfully");
+    if (__DEV__) {
+      console.log("Widget data synced successfully");
+    }
   } catch (error) {
-    console.error("Failed to sync widget data:", error);
+    if (__DEV__) {
+      console.error("Failed to sync widget data:", error);
+    }
   }
 }
 
@@ -99,7 +106,9 @@ export async function readWidgetData(): Promise<WidgetData | null> {
 
     return JSON.parse(content) as WidgetData;
   } catch (error) {
-    console.error("Failed to read widget data:", error);
+    if (__DEV__) {
+      console.error("Failed to read widget data:", error);
+    }
     return null;
   }
 }

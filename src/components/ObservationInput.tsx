@@ -6,6 +6,7 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { clsx } from "clsx";
 import * as Haptics from "expo-haptics";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -27,12 +28,23 @@ const PRESET_TAGS: PresetObservation[] = [
   "loss_of_appetite",
 ];
 
+// Map observation key to i18n key
+const OBSERVATION_I18N_MAP: Record<PresetObservation, string> = {
+  normal: "normal",
+  sneeze: "sneeze",
+  porphyrin: "porphyrin",
+  soft_stool: "softStool",
+  lethargic: "lethargic",
+  loss_of_appetite: "lossOfAppetite",
+};
+
 export function ObservationInput({
   selectedObservations,
   onToggle,
   onAdd,
   onRemove,
 }: ObservationInputProps) {
+  const { t } = useTranslation();
   const [customInput, setCustomInput] = useState("");
   const [isAddingCustom, setIsAddingCustom] = useState(false);
 
@@ -61,11 +73,15 @@ export function ObservationInput({
     (obs) => !PRESET_TAGS.includes(obs as PresetObservation),
   );
 
+  const getObservationLabel = (tag: PresetObservation): string => {
+    const i18nKey = OBSERVATION_I18N_MAP[tag];
+    return t(`observations.${i18nKey}`);
+  };
+
   return (
     <View className="gap-4">
       {/* Preset Tags */}
       <View>
-        <Text className="text-sm text-gray-500 mb-3">Quick Select</Text>
         <View className="flex-row flex-wrap gap-2">
           {PRESET_TAGS.map((tag) => {
             const isSelected = selectedObservations.includes(tag);
@@ -98,7 +114,7 @@ export function ObservationInput({
                     isSelected ? "text-white" : "text-gray-700",
                   )}
                 >
-                  {info.label}
+                  {getObservationLabel(tag)}
                 </Text>
               </TouchableOpacity>
             );
@@ -108,8 +124,6 @@ export function ObservationInput({
 
       {/* Custom Observations */}
       <View>
-        <Text className="text-sm text-gray-500 mb-3">Custom Notes</Text>
-
         {/* Display custom observations as removable chips */}
         {customObservations.length > 0 && (
           <ScrollView
@@ -142,7 +156,7 @@ export function ObservationInput({
             <TextInput
               value={customInput}
               onChangeText={setCustomInput}
-              placeholder="e.g., limping, scratching..."
+              placeholder={t("record.notes")}
               placeholderTextColor="#9CA3AF"
               className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-base text-gray-900"
               autoFocus
@@ -154,7 +168,9 @@ export function ObservationInput({
               className="bg-primary-500 rounded-xl px-4 py-3"
               disabled={!customInput.trim()}
             >
-              <Text className="text-white font-semibold">Add</Text>
+              <Text className="text-white font-semibold">
+                {t("common.add")}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -172,7 +188,7 @@ export function ObservationInput({
             className="flex-row items-center gap-2 bg-gray-100 rounded-xl px-4 py-3"
           >
             <FontAwesome name="plus" size={14} color="#6B7280" />
-            <Text className="text-gray-500">Add custom observation...</Text>
+            <Text className="text-gray-500">{t("record.notes")}...</Text>
           </TouchableOpacity>
         )}
       </View>

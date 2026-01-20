@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
+import { useTranslation } from "react-i18next";
 import { clsx } from "clsx";
 import * as Haptics from "expo-haptics";
+import { HEALTH_THRESHOLDS } from "../config/constants";
 
 interface WeightStepperProps {
   value: number;
@@ -17,6 +19,8 @@ export function WeightStepper({
   max = 9999,
   previousWeight,
 }: WeightStepperProps) {
+  const { t } = useTranslation();
+
   const handleStep = (step: number) => {
     const newValue = Math.max(min, Math.min(max, value + step));
     if (newValue !== value) {
@@ -41,7 +45,8 @@ export function WeightStepper({
       : undefined;
 
   const hasWarning =
-    weightChangePercent !== undefined && weightChangePercent < -5;
+    weightChangePercent !== undefined &&
+    weightChangePercent < HEALTH_THRESHOLDS.WEIGHT_LOSS_WARNING;
 
   return (
     <View className="items-center">
@@ -59,7 +64,7 @@ export function WeightStepper({
             className="text-2xl font-bold text-gray-900 text-center"
             selectTextOnFocus
           />
-          <Text className="text-sm text-gray-500">grams</Text>
+          <Text className="text-sm text-gray-500">{t("record.grams")}</Text>
         </View>
 
         <StepButton label="+1" onPress={() => handleStep(1)} />
@@ -76,8 +81,8 @@ export function WeightStepper({
             )}
           >
             {weightChangePercent > 0 ? "+" : ""}
-            {weightChangePercent.toFixed(1)}% from last record
-            {hasWarning && " ⚠️ Significant weight loss"}
+            {weightChangePercent.toFixed(1)}% {t("record.fromLastRecord")}
+            {hasWarning && ` ⚠️ ${t("record.significantWeightLoss")}`}
           </Text>
         </View>
       )}

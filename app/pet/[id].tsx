@@ -12,7 +12,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { LineChart } from "react-native-chart-kit";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import {
   getPetById,
@@ -27,9 +29,9 @@ import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { ObservationInput } from "@/src/components/ObservationInput";
 import { WeightStepper } from "@/src/components/WeightStepper";
+import { useToast } from "@/src/contexts/ToastContext";
 import { calculateAge, formatDate } from "@/src/utils/date";
 import {
-  SPECIES_NAMES,
   SPECIES_DEFAULT_WEIGHTS,
   OBSERVATION_PRESETS,
   type Pet,
@@ -47,9 +49,11 @@ type TimeRange = "week" | "month";
 function TimeRangeToggle({
   value,
   onChange,
+  labels,
 }: {
   value: TimeRange;
   onChange: (v: TimeRange) => void;
+  labels: { week: string; month: string };
 }) {
   return (
     <View style={toggleStyles.container}>
@@ -66,7 +70,7 @@ function TimeRangeToggle({
               value === "week" && toggleStyles.textActive,
             ]}
           >
-            Week
+            {labels.week}
           </Text>
         </View>
       </Pressable>
@@ -83,7 +87,7 @@ function TimeRangeToggle({
               value === "month" && toggleStyles.textActive,
             ]}
           >
-            Month
+            {labels.month}
           </Text>
         </View>
       </Pressable>
@@ -129,24 +133,13 @@ const SPECIES_EMOJI: Record<string, string> = {
   mouse: "🐭",
 };
 
-function formatRecordDate(dateStr: string): string {
-  const date = new Date(dateStr + "T00:00:00");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (date.getTime() === today.getTime()) return "Today";
-  if (date.getTime() === yesterday.getTime()) return "Yesterday";
-
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function ObservationChip({ observation }: { observation: string }) {
+function ObservationChip({
+  observation,
+  t,
+}: {
+  observation: string;
+  t: (key: string) => string;
+}) {
   const preset = OBSERVATION_PRESETS[observation as PresetObservation];
   if (preset) {
     const colorClasses = {
@@ -154,6 +147,20 @@ function ObservationChip({ observation }: { observation: string }) {
       yellow: "bg-yellow-100 text-yellow-700",
       red: "bg-red-100 text-red-700",
     };
+
+    // Map observation key to i18n key
+    const observationKeyMap: Record<PresetObservation, string> = {
+      normal: "normal",
+      sneeze: "sneeze",
+      porphyrin: "porphyrin",
+      soft_stool: "softStool",
+      lethargic: "lethargic",
+      loss_of_appetite: "lossOfAppetite",
+    };
+
+    const i18nKey = observationKeyMap[observation as PresetObservation];
+    const label = i18nKey ? t(`observations.${i18nKey}`) : preset.label;
+
     return (
       <View
         className={clsx(
@@ -162,7 +169,7 @@ function ObservationChip({ observation }: { observation: string }) {
         )}
       >
         <Text className="text-xs">{preset.emoji}</Text>
-        <Text className="text-xs font-medium">{preset.label}</Text>
+        <Text className="text-xs font-medium">{label}</Text>
       </View>
     );
   }
@@ -176,6 +183,8 @@ function ObservationChip({ observation }: { observation: string }) {
 export default function PetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t, i18n } = useTranslation();
+  const toast = useToast();
   const { deletePet, loadPets } = usePetStore();
 
   const [pet, setPet] = useState<Pet | null>(null);
@@ -192,6 +201,42 @@ export default function PetDetailScreen() {
   // History state
   const [timeRange, setTimeRange] = useState<TimeRange>("week");
   const [history, setHistory] = useState<DailyRecord[]>([]);
+
+  const formatRecordDate = useCallback(
+    (dateStr: string): string => {
+      const date = new Date(dateStr + "T00:00:00");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (date.getTime() === today.getTime()) return t("record.today");
+      if (date.getTime() === yesterday.getTime()) return t("record.yesterday");
+
+      const locale = i18n.language === "zh" ? "zh-CN" : "en-US";
+      return date.toLocaleDateString(locale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    },
+    [t, i18n.language],
+  );
+
+  const getSpeciesName = useCallback(
+    (species: string): string => {
+      const speciesKey = species === "guinea_pig" ? "guineaPig" : species;
+      return t(`species.${speciesKey}`);
+    },
+    [t],
+  );
+
+  const getGenderName = useCallback(
+    (gender: string): string => {
+      return t(`pet.${gender}`);
+    },
+    [t],
+  );
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -293,7 +338,7 @@ export default function PetDetailScreen() {
       await loadPets(); // Refresh home list
       await loadHistory();
     } catch (error) {
-      Alert.alert("Error", "Failed to save. Please try again.");
+      toast.error(t("errors.failedToSave"));
     } finally {
       setIsSaving(false);
     }
@@ -301,12 +346,12 @@ export default function PetDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      "Delete Pet",
-      `Are you sure you want to delete ${pet?.name}? This action cannot be undone.`,
+      t("pet.deletePet"),
+      t("pet.deleteConfirm", { name: pet?.name }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: async () => {
             if (id) {
@@ -330,7 +375,7 @@ export default function PetDetailScreen() {
   if (!pet) {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
-        <Text className="text-gray-500">Pet not found</Text>
+        <Text className="text-gray-500">{t("pet.notFound")}</Text>
       </View>
     );
   }
@@ -390,20 +435,22 @@ export default function PetDetailScreen() {
                 {pet.name}
               </Text>
               <Text className="text-gray-500">
-                {SPECIES_NAMES[pet.species]} · {pet.gender}
+                {getSpeciesName(pet.species)} · {getGenderName(pet.gender)}
               </Text>
               <View className="flex-row gap-6 mt-3">
                 <View className="items-center">
                   <Text className="text-lg font-semibold text-gray-900">
                     {calculateAge(pet.birthday)}
                   </Text>
-                  <Text className="text-xs text-gray-500">Age</Text>
+                  <Text className="text-xs text-gray-500">{t("pet.age")}</Text>
                 </View>
                 <View className="items-center">
                   <Text className="text-lg font-semibold text-gray-900">
                     {formatDate(pet.birthday)}
                   </Text>
-                  <Text className="text-xs text-gray-500">Birthday</Text>
+                  <Text className="text-xs text-gray-500">
+                    {t("pet.birthday")}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -413,11 +460,13 @@ export default function PetDetailScreen() {
           <Card>
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-semibold text-gray-900">
-                Today's Record
+                {t("record.todayRecord")}
               </Text>
               {hasUnsavedChanges && (
                 <View className="bg-primary-100 rounded-full px-2 py-0.5">
-                  <Text className="text-xs text-primary-600">Unsaved</Text>
+                  <Text className="text-xs text-primary-600">
+                    {t("record.unsaved")}
+                  </Text>
                 </View>
               )}
             </View>
@@ -425,7 +474,7 @@ export default function PetDetailScreen() {
             {/* Weight */}
             <View className="mb-4">
               <Text className="text-sm font-medium text-gray-700 mb-2">
-                Weight
+                {t("record.weight")}
               </Text>
               <WeightStepper
                 value={todayWeight}
@@ -437,7 +486,7 @@ export default function PetDetailScreen() {
             {/* Observations */}
             <View className="mb-4">
               <Text className="text-sm font-medium text-gray-700 mb-2">
-                Health Observations
+                {t("record.observations")}
               </Text>
               <ObservationInput
                 selectedObservations={todayObservations}
@@ -449,7 +498,9 @@ export default function PetDetailScreen() {
 
             {/* Save Button */}
             <Button
-              title={hasUnsavedChanges ? "Save Changes" : "Saved"}
+              title={
+                hasUnsavedChanges ? t("record.saveChanges") : t("record.saved")
+              }
               onPress={handleSave}
               loading={isSaving}
               disabled={!hasUnsavedChanges}
@@ -459,45 +510,60 @@ export default function PetDetailScreen() {
 
           {/* Weight Chart */}
           {chartData && (
-            <Card>
-              <Text className="text-lg font-semibold text-gray-900 mb-4">
-                Weight Trend
-              </Text>
-              <LineChart
-                data={chartData}
-                width={screenWidth - 64}
-                height={180}
-                chartConfig={{
-                  backgroundColor: "#fff",
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(237, 122, 17, ${opacity})`,
-                  labelColor: (opacity = 1) =>
-                    `rgba(107, 114, 128, ${opacity})`,
-                  propsForDots: { r: "4", strokeWidth: "2", stroke: "#ed7a11" },
-                }}
-                bezier
-                style={{ borderRadius: 16 }}
-              />
-            </Card>
+            <Animated.View entering={FadeInUp.delay(200).springify()}>
+              <Card>
+                <Text className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("record.weightTrend")}
+                </Text>
+                <LineChart
+                  data={chartData}
+                  width={screenWidth - 64}
+                  height={180}
+                  chartConfig={{
+                    backgroundColor: "#fff",
+                    backgroundGradientFrom: "#fff",
+                    backgroundGradientTo: "#fff",
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(237, 122, 17, ${opacity})`,
+                    labelColor: (opacity = 1) =>
+                      `rgba(107, 114, 128, ${opacity})`,
+                    propsForDots: {
+                      r: "4",
+                      strokeWidth: "2",
+                      stroke: "#ed7a11",
+                    },
+                  }}
+                  bezier
+                  style={{ borderRadius: 16 }}
+                />
+              </Card>
+            </Animated.View>
           )}
 
           {/* History Section */}
           <Card>
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-semibold text-gray-900">
-                History
+                {t("record.history")}
               </Text>
 
               {/* Week/Month Toggle */}
-              <TimeRangeToggle value={timeRange} onChange={setTimeRange} />
+              <TimeRangeToggle
+                value={timeRange}
+                onChange={setTimeRange}
+                labels={{
+                  week: t("record.week"),
+                  month: t("record.month"),
+                }}
+              />
             </View>
 
             {history.length === 0 ? (
               <View className="items-center py-6">
                 <FontAwesome name="calendar-o" size={32} color="#D1D5DB" />
-                <Text className="text-gray-400 mt-2">No history yet</Text>
+                <Text className="text-gray-400 mt-2">
+                  {t("record.noHistory")}
+                </Text>
               </View>
             ) : (
               <View className="gap-3">
@@ -519,7 +585,7 @@ export default function PetDetailScreen() {
                     {record.observations.length > 0 && (
                       <View className="flex-row flex-wrap gap-1">
                         {record.observations.map((obs, i) => (
-                          <ObservationChip key={i} observation={obs} />
+                          <ObservationChip key={i} observation={obs} t={t} />
                         ))}
                       </View>
                     )}
@@ -536,7 +602,7 @@ export default function PetDetailScreen() {
 
           {/* Delete Button */}
           <Button
-            title="Delete Pet"
+            title={t("pet.deletePet")}
             onPress={handleDelete}
             variant="danger"
             className="mt-4"

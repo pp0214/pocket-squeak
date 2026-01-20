@@ -7,12 +7,13 @@ import {
   addWeightLog as dbAddWeightLog,
   addHealthLog as dbAddHealthLog,
 } from "../db/queries";
-import { sendHealthAlert, getNotificationSettings } from "../services/notificationService";
+import {
+  sendHealthAlert,
+  getNotificationSettings,
+} from "../services/notificationService";
 import { onPetDataChanged } from "../services/widgetService";
+import { HEALTH_THRESHOLDS } from "../config/constants";
 import i18n from "../i18n";
-
-// Threshold for weight loss alert (percentage)
-const WEIGHT_LOSS_ALERT_THRESHOLD = -5;
 
 interface HealthAlert {
   petId: number;
@@ -58,7 +59,7 @@ export const usePetStore = create<PetState>((set, get) => ({
     for (const pet of pets) {
       if (
         pet.weightChange !== undefined &&
-        pet.weightChange <= WEIGHT_LOSS_ALERT_THRESHOLD
+        pet.weightChange <= HEALTH_THRESHOLDS.WEIGHT_LOSS_WARNING
       ) {
         alerts.push({
           petId: pet.id,
@@ -74,7 +75,7 @@ export const usePetStore = create<PetState>((set, get) => ({
             i18n.t("notifications.weightAlertBody", {
               name: pet.name,
               percent: Math.abs(pet.weightChange).toFixed(1),
-            })
+            }),
           );
         }
       }

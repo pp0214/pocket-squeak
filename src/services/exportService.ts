@@ -1,7 +1,8 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { getPets, getDailyRecords, getAllPetRecordsForDateRange } from "../db/queries";
-import type { Pet, DailyRecord } from "../types";
+import { getAllPetRecordsForDateRange } from "../db/queries";
+import type { DailyRecord } from "../types";
+import { escapeCSVField } from "../utils/helpers";
 
 export interface ExportOptions {
   petIds?: number[]; // If empty, export all pets
@@ -13,16 +14,23 @@ export interface ExportOptions {
  * Generate CSV content from daily records
  */
 function generateCSV(
-  records: (DailyRecord & { petName: string; petSpecies: string })[]
+  records: (DailyRecord & { petName: string; petSpecies: string })[],
 ): string {
-  const headers = ["Date", "Pet Name", "Species", "Weight (g)", "Observations", "Notes"];
+  const headers = [
+    "Date",
+    "Pet Name",
+    "Species",
+    "Weight (g)",
+    "Observations",
+    "Notes",
+  ];
   const rows = records.map((record) => [
     record.recordDate,
-    `"${record.petName}"`,
+    escapeCSVField(record.petName),
     record.petSpecies,
     record.weight?.toString() ?? "",
-    `"${record.observations.join(", ")}"`,
-    `"${record.notes ?? ""}"`,
+    escapeCSVField(record.observations.join(", ")),
+    escapeCSVField(record.notes ?? ""),
   ]);
 
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -31,7 +39,9 @@ function generateCSV(
 /**
  * Export health records as CSV
  */
-export async function exportToCSV(options: ExportOptions = {}): Promise<string> {
+export async function exportToCSV(
+  options: ExportOptions = {},
+): Promise<string> {
   const { petIds, startDate, endDate } = options;
 
   // Calculate date range
@@ -88,7 +98,9 @@ export async function shareFile(filepath: string): Promise<void> {
 /**
  * Export and share CSV
  */
-export async function exportAndShareCSV(options: ExportOptions = {}): Promise<void> {
+export async function exportAndShareCSV(
+  options: ExportOptions = {},
+): Promise<void> {
   const filepath = await exportToCSV(options);
   await shareFile(filepath);
 }

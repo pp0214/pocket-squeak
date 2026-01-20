@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { View, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,6 +18,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ onAddPet }: EmptyStateProps) {
+  const { t } = useTranslation();
   const scale = useSharedValue(0);
   const bounce = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -77,18 +79,17 @@ export function EmptyState({ onAddPet }: EmptyStateProps) {
       {/* Text content */}
       <Animated.View style={textAnimatedStyle} className="items-center">
         <Text className="text-2xl font-bold text-gray-900 mb-2 text-center">
-          Welcome to Pocket Squeak!
+          {t("home.welcome")}
         </Text>
         <Text className="text-base text-gray-500 text-center leading-6 mb-8 max-w-xs">
-          Track your small furry friends' health, weight, and daily care with
-          ease.
+          {t("home.welcomeDesc")}
         </Text>
       </Animated.View>
 
       {/* CTA Button */}
       <Animated.View style={buttonAnimatedStyle} className="w-full max-w-xs">
         <Button
-          title="Add Your First Pet"
+          title={t("home.addYourFirstPet")}
           onPress={onAddPet}
           size="lg"
           className="shadow-lg"
@@ -100,19 +101,25 @@ export function EmptyState({ onAddPet }: EmptyStateProps) {
             <View className="w-12 h-12 rounded-xl bg-green-100 items-center justify-center mb-2">
               <Text className="text-2xl">📊</Text>
             </View>
-            <Text className="text-xs text-gray-500">Weight</Text>
+            <Text className="text-xs text-gray-500">
+              {t("home.featureWeight")}
+            </Text>
           </View>
           <View className="items-center">
             <View className="w-12 h-12 rounded-xl bg-blue-100 items-center justify-center mb-2">
               <Text className="text-2xl">💊</Text>
             </View>
-            <Text className="text-xs text-gray-500">Health</Text>
+            <Text className="text-xs text-gray-500">
+              {t("home.featureHealth")}
+            </Text>
           </View>
           <View className="items-center">
             <View className="w-12 h-12 rounded-xl bg-purple-100 items-center justify-center mb-2">
               <Text className="text-2xl">📝</Text>
             </View>
-            <Text className="text-xs text-gray-500">Notes</Text>
+            <Text className="text-xs text-gray-500">
+              {t("home.featureNotes")}
+            </Text>
           </View>
         </View>
       </Animated.View>

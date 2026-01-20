@@ -1,15 +1,26 @@
 import * as SQLite from "expo-sqlite";
 
 let db: SQLite.SQLiteDatabase | null = null;
+let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
+  // Return cached instance if available
   if (db) {
     return db;
   }
 
-  db = await SQLite.openDatabaseAsync("pocket-squeak.db");
-  await initDatabase(db);
-  return db;
+  // Use promise-based locking to prevent race condition
+  // If initialization is already in progress, wait for it
+  if (!dbPromise) {
+    dbPromise = (async () => {
+      const database = await SQLite.openDatabaseAsync("pocket-squeak.db");
+      await initDatabase(database);
+      db = database;
+      return database;
+    })();
+  }
+
+  return dbPromise;
 }
 
 async function initDatabase(database: SQLite.SQLiteDatabase): Promise<void> {
@@ -84,5 +95,6 @@ export async function closeDatabase(): Promise<void> {
   if (db) {
     await db.closeAsync();
     db = null;
+    dbPromise = null;
   }
 }

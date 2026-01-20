@@ -4,16 +4,15 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { getPets } from "@/src/db/queries";
 import { exportAndShareCSV } from "@/src/services/exportService";
+import { useToast } from "@/src/contexts/ToastContext";
 import type { Pet } from "@/src/types";
 import { clsx } from "clsx";
 
@@ -21,7 +20,7 @@ type DateRange = "week" | "month" | "all";
 
 export default function ExportModal() {
   const { t } = useTranslation();
-  const router = useRouter();
+  const toast = useToast();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [selectedPetIds, setSelectedPetIds] = useState<number[]>([]);
@@ -45,7 +44,9 @@ export default function ExportModal() {
 
   const togglePet = (petId: number) => {
     setSelectedPetIds((prev) =>
-      prev.includes(petId) ? prev.filter((id) => id !== petId) : [...prev, petId]
+      prev.includes(petId)
+        ? prev.filter((id) => id !== petId)
+        : [...prev, petId],
     );
   };
 
@@ -82,12 +83,9 @@ export default function ExportModal() {
         startDate: start,
         endDate: end,
       });
-      Alert.alert(t("common.success"), t("export.success"));
+      toast.success(t("export.success"));
     } catch (error) {
-      Alert.alert(
-        t("common.error"),
-        error instanceof Error ? error.message : t("export.error")
-      );
+      toast.error(error instanceof Error ? error.message : t("export.error"));
     } finally {
       setIsExporting(false);
     }
@@ -126,7 +124,9 @@ export default function ExportModal() {
                 onPress={() => togglePet(pet.id)}
                 className={clsx(
                   "flex-row items-center p-3 rounded-xl",
-                  selectedPetIds.includes(pet.id) ? "bg-primary-50" : "bg-gray-50"
+                  selectedPetIds.includes(pet.id)
+                    ? "bg-primary-50"
+                    : "bg-gray-50",
                 )}
               >
                 <View
@@ -134,14 +134,16 @@ export default function ExportModal() {
                     "w-6 h-6 rounded-full border-2 items-center justify-center mr-3",
                     selectedPetIds.includes(pet.id)
                       ? "bg-primary-500 border-primary-500"
-                      : "border-gray-300"
+                      : "border-gray-300",
                   )}
                 >
                   {selectedPetIds.includes(pet.id) && (
                     <FontAwesome name="check" size={12} color="#fff" />
                   )}
                 </View>
-                <Text className="flex-1 text-gray-900 font-medium">{pet.name}</Text>
+                <Text className="flex-1 text-gray-900 font-medium">
+                  {pet.name}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -166,16 +168,18 @@ export default function ExportModal() {
                 onPress={() => setDateRange(range)}
                 className={clsx(
                   "flex-1 py-3 rounded-xl items-center",
-                  dateRange === range ? "bg-primary-500" : "bg-gray-100"
+                  dateRange === range ? "bg-primary-500" : "bg-gray-100",
                 )}
               >
                 <Text
                   className={clsx(
                     "font-medium",
-                    dateRange === range ? "text-white" : "text-gray-700"
+                    dateRange === range ? "text-white" : "text-gray-700",
                   )}
                 >
-                  {t(`export.${range === "week" ? "lastWeek" : range === "month" ? "lastMonth" : "allTime"}`)}
+                  {t(
+                    `export.${range === "week" ? "lastWeek" : range === "month" ? "lastMonth" : "allTime"}`,
+                  )}
                 </Text>
               </TouchableOpacity>
             ))}

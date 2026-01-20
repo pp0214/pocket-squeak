@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { View, Text, ScrollView, Alert, TextInput } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTranslation } from "react-i18next";
 import * as Haptics from "expo-haptics";
 import { usePetStore } from "@/src/store/petStore";
+import { useToast } from "@/src/contexts/ToastContext";
 import {
   getLatestWeight,
   getTodayRecord,
@@ -14,7 +16,9 @@ import { Button } from "@/src/components/ui/Button";
 import { SPECIES_DEFAULT_WEIGHTS } from "@/src/types";
 
 export default function RecorderModal() {
+  const { t } = useTranslation();
   const router = useRouter();
+  const toast = useToast();
   const { petId } = useLocalSearchParams<{ petId: string }>();
   const { pets, loadPets } = usePetStore();
 
@@ -89,16 +93,16 @@ export default function RecorderModal() {
           100
         ).toFixed(1);
         Alert.alert(
-          "Weight Warning",
-          `Weight has dropped by ${weightDrop}% from last record. This may indicate a health issue.`,
+          t("record.weightWarning"),
+          t("record.weightDropWarning", { percent: weightDrop }),
           [
             {
-              text: "Cancel",
+              text: t("common.cancel"),
               style: "cancel",
               onPress: () => setIsSaving(false),
             },
             {
-              text: "Save Anyway",
+              text: t("record.saveAnyway"),
               style: "destructive",
               onPress: async () => {
                 await saveRecord();
@@ -111,7 +115,7 @@ export default function RecorderModal() {
 
       await saveRecord();
     } catch (error) {
-      Alert.alert("Error", "Failed to save record. Please try again.");
+      toast.error(t("errors.failedToSave"));
       setIsSaving(false);
     }
   };
@@ -131,7 +135,7 @@ export default function RecorderModal() {
       await loadPets();
       router.back();
     } catch (error) {
-      Alert.alert("Error", "Failed to save record. Please try again.");
+      toast.error(t("errors.failedToSave"));
     } finally {
       setIsSaving(false);
     }
@@ -140,7 +144,7 @@ export default function RecorderModal() {
   if (!pet) {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
-        <Text className="text-gray-500">Pet not found</Text>
+        <Text className="text-gray-500">{t("pet.notFound")}</Text>
       </View>
     );
   }
@@ -148,7 +152,7 @@ export default function RecorderModal() {
   if (isLoading) {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
-        <Text className="text-gray-500">Loading...</Text>
+        <Text className="text-gray-500">{t("common.loading")}</Text>
       </View>
     );
   }
@@ -163,29 +167,21 @@ export default function RecorderModal() {
         <View className="items-center">
           <View className="w-16 h-16 rounded-full bg-primary-100 items-center justify-center mb-2">
             <Text className="text-3xl">
-              {pet.species === "rat" && "🐀"}
-              {pet.species === "guinea_pig" && "🐹"}
-              {pet.species === "hamster" && "🐹"}
-              {pet.species === "gerbil" && "🐭"}
-              {pet.species === "mouse" && "🐭"}
+              {pet.species === "rat" ? "🐀" : "🐹"}
             </Text>
           </View>
           <Text className="text-xl font-semibold text-gray-900">
             {pet.name}
           </Text>
           <Text className="text-sm text-gray-500">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-            })}
+            {new Date().toLocaleDateString()}
           </Text>
         </View>
 
         {/* Weight Section */}
         <View className="bg-white rounded-2xl p-4 shadow-sm">
           <Text className="text-lg font-semibold text-gray-900 mb-4 text-center">
-            Weight
+            {t("record.weight")}
           </Text>
           <WeightStepper
             value={weight}
@@ -197,10 +193,10 @@ export default function RecorderModal() {
         {/* Observations Section */}
         <View className="bg-white rounded-2xl p-4 shadow-sm">
           <Text className="text-lg font-semibold text-gray-900 mb-2">
-            Health Observations
+            {t("record.healthObservations")}
           </Text>
           <Text className="text-sm text-gray-500 mb-4">
-            Select symptoms or add custom notes
+            {t("record.selectSymptoms")}
           </Text>
           <ObservationInput
             selectedObservations={observations}
@@ -213,12 +209,12 @@ export default function RecorderModal() {
         {/* Additional Notes Section */}
         <View className="bg-white rounded-2xl p-4 shadow-sm">
           <Text className="text-lg font-semibold text-gray-900 mb-2">
-            Additional Notes
+            {t("record.additionalNotes")}
           </Text>
           <TextInput
             value={notes}
             onChangeText={setNotes}
-            placeholder="Any additional observations or notes..."
+            placeholder={t("record.notesPlaceholder")}
             placeholderTextColor="#9CA3AF"
             multiline
             numberOfLines={3}
@@ -229,7 +225,7 @@ export default function RecorderModal() {
 
         {/* Save Button */}
         <Button
-          title="Save Record"
+          title={t("record.saveRecord")}
           onPress={handleSave}
           loading={isSaving}
           size="lg"
@@ -237,7 +233,7 @@ export default function RecorderModal() {
 
         {/* Info text */}
         <Text className="text-xs text-gray-400 text-center">
-          Records are saved per day. Multiple entries today will be merged.
+          {t("record.recordsPerDay")}
         </Text>
       </View>
     </ScrollView>

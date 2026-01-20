@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 const IMAGES_DIR = `${FileSystem.documentDirectory}pet_images/`;
 
@@ -28,7 +28,7 @@ function generateImageFilename(petId: number | string): string {
  */
 export async function saveImageToStorage(
   sourceUri: string,
-  petId: number | string = "new"
+  petId: number | string = "new",
 ): Promise<string | undefined> {
   try {
     await ensureImagesDir();
@@ -48,7 +48,9 @@ export async function saveImageToStorage(
 
     return destUri;
   } catch (error) {
-    console.error("Failed to save image to storage:", error);
+    if (__DEV__) {
+      console.error("Failed to save image to storage:", error);
+    }
     return undefined;
   }
 }
@@ -63,7 +65,7 @@ export async function saveImageToStorage(
 export async function updatePetImage(
   newSourceUri: string,
   petId: number,
-  oldImageUri?: string
+  oldImageUri?: string,
 ): Promise<string | undefined> {
   try {
     // Save new image first
@@ -76,7 +78,9 @@ export async function updatePetImage(
 
     return newUri;
   } catch (error) {
-    console.error("Failed to update pet image:", error);
+    if (__DEV__) {
+      console.error("Failed to update pet image:", error);
+    }
     return undefined;
   }
 }
@@ -86,7 +90,7 @@ export async function updatePetImage(
  * @param imageUri - The URI of the image to delete
  */
 export async function deleteImageFromStorage(
-  imageUri: string
+  imageUri: string,
 ): Promise<boolean> {
   try {
     // Only delete if it's in our images directory
@@ -100,7 +104,9 @@ export async function deleteImageFromStorage(
     }
     return true;
   } catch (error) {
-    console.error("Failed to delete image from storage:", error);
+    if (__DEV__) {
+      console.error("Failed to delete image from storage:", error);
+    }
     return false;
   }
 }
@@ -120,7 +126,9 @@ export async function deletePetImages(petId: number): Promise<void> {
       await FileSystem.deleteAsync(`${IMAGES_DIR}${file}`);
     }
   } catch (error) {
-    console.error("Failed to delete pet images:", error);
+    if (__DEV__) {
+      console.error("Failed to delete pet images:", error);
+    }
   }
 }
 

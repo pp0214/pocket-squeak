@@ -1,5 +1,5 @@
 // Pet species types
-export type PetSpecies = "rat" | "guinea_pig" | "hamster" | "gerbil" | "mouse";
+export type PetSpecies = "rat" | "guinea_pig";
 export type Gender = "male" | "female" | "unknown";
 
 // Preset observation tags (for quick selection)
@@ -56,10 +56,10 @@ export interface HealthLog {
 
 export interface FoodItem {
   id: string;
-  name: string;
   category: string;
-  safety: FoodSafety;
-  notes?: string;
+  defaultSafety: FoodSafety;
+  speciesSafety: Partial<Record<PetSpecies, FoodSafety>>;
+  recommendedFor: PetSpecies[];
 }
 
 // Form types
@@ -88,18 +88,12 @@ export interface PetWithLatestWeight extends Pet {
 export const SPECIES_DEFAULT_WEIGHTS: Record<PetSpecies, number> = {
   rat: 350,
   guinea_pig: 900,
-  hamster: 40,
-  gerbil: 70,
-  mouse: 25,
 };
 
 // Species display names
 export const SPECIES_NAMES: Record<PetSpecies, string> = {
-  rat: "Rat",
+  rat: "Fancy Rat",
   guinea_pig: "Guinea Pig",
-  hamster: "Hamster",
-  gerbil: "Gerbil",
-  mouse: "Mouse",
 };
 
 // Preset observation display info

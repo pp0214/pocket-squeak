@@ -1,6 +1,10 @@
-import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { Text, ActivityIndicator, Pressable } from "react-native";
+import Animated from "react-native-reanimated";
 import { clsx } from "clsx";
+import { useAnimatedPress } from "@/src/hooks/useAnimatedPress";
 import * as Haptics from "expo-haptics";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface ButtonProps {
   title: string;
@@ -23,19 +27,23 @@ export function Button({
   haptic = true,
   className,
 }: ButtonProps) {
+  const { animatedStyle, onPressIn, onPressOut } = useAnimatedPress({
+    hapticEnabled: haptic,
+    hapticStyle: Haptics.ImpactFeedbackStyle.Light,
+  });
+
   const handlePress = () => {
-    if (haptic) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!disabled && !loading) {
+      onPress();
     }
-    onPress();
   };
 
   const baseStyles = "rounded-xl items-center justify-center flex-row";
 
   const variantStyles = {
-    primary: "bg-primary-500 active:bg-primary-600",
-    secondary: "bg-gray-200 active:bg-gray-300",
-    danger: "bg-red-500 active:bg-red-600",
+    primary: "bg-primary-500",
+    secondary: "bg-gray-200",
+    danger: "bg-red-500",
     ghost: "bg-transparent",
   };
 
@@ -59,9 +67,12 @@ export function Button({
   };
 
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       onPress={handlePress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       disabled={disabled || loading}
+      style={animatedStyle}
       className={clsx(
         baseStyles,
         variantStyles[variant],
@@ -69,7 +80,6 @@ export function Button({
         (disabled || loading) && "opacity-50",
         className,
       )}
-      activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator
@@ -87,6 +97,6 @@ export function Button({
           {title}
         </Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }

@@ -5,13 +5,18 @@ import { useTranslation } from "react-i18next";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
-import { createAndShareBackup, pickAndRestoreBackup } from "@/src/services/backupService";
+import {
+  createAndShareBackup,
+  pickAndRestoreBackup,
+} from "@/src/services/backupService";
 import { usePetStore } from "@/src/store/petStore";
+import { useToast } from "@/src/contexts/ToastContext";
 
 export default function BackupModal() {
   const { t } = useTranslation();
   const router = useRouter();
   const { loadPets } = usePetStore();
+  const toast = useToast();
 
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -20,12 +25,9 @@ export default function BackupModal() {
     setIsBackingUp(true);
     try {
       await createAndShareBackup();
-      Alert.alert(t("common.success"), t("backup.backupSuccess"));
+      toast.success(t("backup.backupSuccess"));
     } catch (error) {
-      Alert.alert(
-        t("common.error"),
-        error instanceof Error ? error.message : t("backup.error")
-      );
+      toast.error(error instanceof Error ? error.message : t("backup.error"));
     } finally {
       setIsBackingUp(false);
     }
@@ -42,14 +44,13 @@ export default function BackupModal() {
           try {
             const restored = await pickAndRestoreBackup();
             if (restored) {
-              await loadPets(); // Refresh data
-              Alert.alert(t("common.success"), t("backup.restoreSuccess"));
+              await loadPets();
+              toast.success(t("backup.restoreSuccess"));
               router.back();
             }
           } catch (error) {
-            Alert.alert(
-              t("common.error"),
-              error instanceof Error ? error.message : t("backup.error")
+            toast.error(
+              error instanceof Error ? error.message : t("backup.error"),
             );
           } finally {
             setIsRestoring(false);
